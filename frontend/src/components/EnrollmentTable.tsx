@@ -151,19 +151,19 @@ function EnrollmentTable({
                 >
                   Drop
                 </button>
-              </>
-              )}
+                </>
+                )}
 
-              {/* If dropped → can Re-Enroll */}
-              {enrollment.status === "dropped" && (
-              <button
-                onClick={() => handleStatusChange(enrollment.id, "enrolled")}
-                style={{ background: "green", color: "white" }}
-              >
-                Re-Enroll
-              </button>
-              )}
-              </td>
+                {/* If dropped → can Re-Enroll */}
+                {enrollment.status === "dropped" && (
+                <button
+                  onClick={() => handleStatusChange(enrollment.id, "enrolled")}
+                  style={{ background: "green", color: "white" }}
+                >
+                  Re-Enroll
+                </button>
+                )}
+                </td>
 
               </tr>
             ))
