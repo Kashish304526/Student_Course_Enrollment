@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from core.database import get_db
-from schemas.enrollment import EnrollmentCreate, EnrollmentResponse
+from schemas.enrollment import EnrollmentCreate, EnrollmentResponse, StatusUpdateRequest
 from services.enrollment_service import (
     enroll_student,
     get_all_enrollments,
@@ -22,7 +22,8 @@ def list_enrollments(db: Session = Depends(get_db)):
 @router.patch("/{enrollment_id}/status", response_model=EnrollmentResponse)
 def change_status(
     enrollment_id: int,
-    status: EnrollmentStatus,
+    payload: StatusUpdateRequest,
     db: Session = Depends(get_db)
 ):
-    return update_status(db, enrollment_id, status)
+    return update_status(db, enrollment_id, payload.status)
+

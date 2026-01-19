@@ -13,6 +13,10 @@ class EnrollmentResponse(BaseModel):
     id: int
     student_name: str
     course_id: int
-    status: Literal["Enrolled", "Dropped"]
+    status: EnrollmentStatus
 
     model_config = ConfigDict(from_attributes=True)
+
+class StatusUpdateRequest(BaseModel):
+    status: EnrollmentStatus
+

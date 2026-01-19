@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from core.database import Base
+from utils.enums import EnrollmentStatus
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
@@ -7,4 +8,5 @@ class Enrollment(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_name = Column(String, nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    status = Column(String, default="Enrolled")
+    status = Column(String, default=EnrollmentStatus.enrolled.value)
+

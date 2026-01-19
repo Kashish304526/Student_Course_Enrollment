@@ -5,6 +5,20 @@ from schemas.course import CourseCreate, CourseUpdate
 
 # CREATE
 def create_course(db: Session, course: CourseCreate):
+    # Check if course already exists (by name)
+    existing = (
+        db.query(Course)
+        .filter(Course.course_name == course.course_name)
+        .first()
+    )
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Course already exists"
+        )
+
+    # Create new course
     db_course = Course(**course.model_dump())
     db.add(db_course)
     db.commit()

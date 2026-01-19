@@ -9,12 +9,12 @@ export const getEnrollments = () =>
 
 export const updateEnrollmentStatus = (
   enrollmentId: number,
-  status: "Enrolled" | "Dropped"
+  status: "enrolled" | "paused" | "dropped"
 ) =>
   api.patch<Enrollment>(
     `/enrollments/${enrollmentId}/status`,
-    null,
     {
-      params: { status },
+      status: status,   // ✅ send in body
     }
   );
+

@@ -1,4 +1,5 @@
-import type{ Enrollment } from "../types/enrollment";
+import { useState } from "react";
+import type { Enrollment } from "../types/enrollment";
 import type { Course } from "../types/course";
 import { updateEnrollmentStatus } from "../api/enrollmentApi";
 
@@ -13,22 +14,81 @@ function EnrollmentTable({
   courses,
   onRefresh,
 }: EnrollmentTableProps) {
+  // 🔍 Filter states
+  const [studentFilter, setStudentFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   // Map course_id → course_name
   const courseMap = new Map<number, string>(
-    courses.map(course => [course.id, course.course_name])
+    courses.map((course) => [course.id, course.course_name])
   );
 
-  // Group enrollments by student
-  const grouped = enrollments.reduce((acc, en) => {
+  // Apply filtering
+  const filteredEnrollments = enrollments.filter((e) => {
+    const studentMatch = e.student_name
+      .toLowerCase()
+      .includes(studentFilter.toLowerCase());
+
+    const courseName = courseMap.get(e.course_id) || "";
+    const courseMatch = courseName
+      .toLowerCase()
+      .includes(courseFilter.toLowerCase());
+
+    const statusMatch =
+      statusFilter === "" || e.status === statusFilter;
+
+    return studentMatch && courseMatch && statusMatch;
+  });
+
+  // Group by student
+  const grouped = filteredEnrollments.reduce((acc, en) => {
     if (!acc[en.student_name]) acc[en.student_name] = [];
     acc[en.student_name].push(en);
     return acc;
   }, {} as Record<string, Enrollment[]>);
 
+  // Helper to display status nicely
+  const formatStatus = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1);
+
+  const handleStatusChange = async (
+    id: number,
+    status: "enrolled" | "paused" | "dropped"
+  ) => {
+    await updateEnrollmentStatus(id, status);
+    onRefresh();
+  };
+
   return (
     <div className="card">
-      <h2>Enrollments</h2> <br />
+      <h2>Enrollments</h2>
+      <br />
+
+      {/* 🔍 Filters */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+        <input
+          placeholder="Filter by student"
+          value={studentFilter}
+          onChange={(e) => setStudentFilter(e.target.value)}
+        />
+
+        <input
+          placeholder="Filter by course"
+          value={courseFilter}
+          onChange={(e) => setCourseFilter(e.target.value)}
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All Status</option>
+          <option value="enrolled">Enrolled</option>
+          <option value="paused">Paused</option>
+          <option value="dropped">Dropped</option>
+        </select>
+      </div>
 
       <table>
         <thead>
@@ -46,45 +106,65 @@ function EnrollmentTable({
               <tr key={enrollment.id}>
                 {/* Show student name once */}
                 {index === 0 && (
-                  <td rowSpan={enrollList.length}>
-                    {student}
-                  </td>
+                  <td rowSpan={enrollList.length}>{student}</td>
                 )}
 
                 <td>
                   {courseMap.get(enrollment.course_id) || "Unknown"}
                 </td>
 
-                <td
-                  className={
-                    enrollment.status === "Enrolled"
-                      ? "status-enrolled"
-                      : "status-dropped"
-                  }
-                >
-                  {enrollment.status}
+                <td className={`status ${enrollment.status}`}>
+                  {formatStatus(enrollment.status)}
                 </td>
 
-                <td>
+                <td style={{ display: "flex", gap: "6px" }}>
+                {/* If enrolled → can Pause or Drop */}
+                {enrollment.status === "enrolled" && (
+                <>
                   <button
-                    onClick={async () => {
-                      const newStatus =
-                        enrollment.status === "Enrolled"
-                          ? "Dropped"
-                          : "Enrolled";
-
-                      await updateEnrollmentStatus(
-                        enrollment.id,
-                        newStatus
-                      );
-                      onRefresh();
-                    }}
-                  >
-                    {enrollment.status === "Enrolled"
-                      ? "Drop"
-                      : "Re-Enroll"}
+                    onClick={() => handleStatusChange(enrollment.id, "paused")}
+                    >
+                      Pause
                   </button>
-                </td>
+
+                  <button
+                    onClick={() => handleStatusChange(enrollment.id, "dropped")}
+                    style={{ background: "red", color: "white" }}
+                  >
+                    Drop
+                  </button>
+                  </>
+                )}
+
+                {/* If paused → can Resume or Drop */}
+                {enrollment.status === "paused" && (
+                <>
+                <button
+                  onClick={() => handleStatusChange(enrollment.id, "enrolled")}
+                >
+                  Resume
+                </button>
+
+                <button
+                  onClick={() => handleStatusChange(enrollment.id, "dropped")}
+                  style={{ background: "red", color: "white" }}
+                >
+                  Drop
+                </button>
+              </>
+              )}
+
+              {/* If dropped → can Re-Enroll */}
+              {enrollment.status === "dropped" && (
+              <button
+                onClick={() => handleStatusChange(enrollment.id, "enrolled")}
+                style={{ background: "green", color: "white" }}
+              >
+                Re-Enroll
+              </button>
+              )}
+              </td>
+
               </tr>
             ))
           )}
@@ -95,5 +175,6 @@ function EnrollmentTable({
 }
 
 export default EnrollmentTable;
+
 
 

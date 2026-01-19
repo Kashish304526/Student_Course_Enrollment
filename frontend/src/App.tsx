@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import CourseList from "./components/CourseList";
 import EnrollmentForm from "./components/EnrollmentForm";
 import EnrollmentTable from "./components/EnrollmentTable";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+
 
 import { getCourses } from "./api/courseApi";
 import { getEnrollments } from "./api/enrollmentApi";
@@ -27,24 +30,49 @@ function App() {
   }, []);
 
   return (
-    <div className="container">
-      <h1 className="title">Student Course Enrollment System</h1>
+    <>
+      <Navbar />
 
-      <CourseList courses={courses} onCourseChange={fetchCourses} />
+      <div className="container">
+        <Routes>
+          <Route
+            path="/"
+            element={<Navigate to="/courses" />}
+          />
 
-      <EnrollmentForm
-        courses={courses}
-        onEnroll={fetchEnrollments}
-      />
+          <Route
+            path="/courses"
+            element={
+              <>
+                <CourseList
+                  courses={courses}
+                  enrollments={enrollments}
+                  onCourseChange={fetchCourses}
+                />
+              </>
+            }
+          />
 
-      <EnrollmentTable
-        enrollments={enrollments}
-        courses={courses}
-        onRefresh={fetchEnrollments}
-      />
+          <Route
+            path="/enrollments"
+            element={
+              <>
+                <EnrollmentForm
+                  courses={courses}
+                  onEnroll={fetchEnrollments}
+                />
 
-
-    </div>
+                <EnrollmentTable
+                  enrollments={enrollments}
+                  courses={courses}
+                  onRefresh={fetchEnrollments}
+                />
+              </>
+            }
+          />
+        </Routes>
+      </div>
+    </>
   );
 }
 

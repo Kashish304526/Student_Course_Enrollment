@@ -1,5 +1,6 @@
 from enum import Enum
 
 class EnrollmentStatus(str, Enum):
-    enrolled = "Enrolled"
-    dropped = "Dropped"
+    enrolled = "enrolled"
+    paused = "paused"
+    dropped = "dropped"

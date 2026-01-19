@@ -85,12 +85,72 @@ th {
 }
 
 /* Status */
-.status-enrolled {
-  color: green;
+.status.enrolled { color: green; }
+.status.paused { color: orange; }
+.status.dropped { color: red; }
+
+.error-box {
+  background: #ffe0e0;
+  color: #b00000;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.count-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.student-count {
+  color: blue;
+  cursor: pointer;
   font-weight: bold;
 }
 
-.status-dropped {
-  color: red;
-  font-weight: bold;
+.student-tooltip {
+  display: none;
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  min-width: 150px;
 }
+
+.count-wrapper:hover .student-tooltip {
+  display: block;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #a2b0f2 0%, #74f79c 100%);  
+  color: rgb(4, 4, 4);
+  padding: 20px 20px;
+
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-item {
+  color: #0e0f0f;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: rgb(27, 26, 26);
+  border-bottom: 2px solid rgb(11, 9, 9);
+  padding-bottom: 2px;
+}
+
+
