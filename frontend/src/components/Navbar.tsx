@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import "../index.css";
 
 function Navbar() {
+    
   return (
     <div className="navbar">
       <h3>Student Course Enrollment System</h3>

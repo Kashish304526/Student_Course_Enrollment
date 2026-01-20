@@ -23,6 +23,10 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const PAGE_SIZE = 3; 
+
 
   const activeEnrollments = enrollments.filter(e => e.status !== "dropped");
 
@@ -51,24 +55,41 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
   }, 3000); 
 
   return () => clearTimeout(timer);
-}, [error]);
+  }, [error]);
 
 
   const handleSubmit = async () => {
+  // 1. Empty check
   if (!courseName.trim()) {
     setError("Course name is required");
     return;
   }
 
+  // 2. Duration check
   if (!durationValue || durationValue <= 0) {
     setError("Duration must be greater than 0");
+    return;
+  }
+
+  // 3. Duplicate check (case-insensitive)
+  const normalizedNew = courseName.toLowerCase().trim();
+
+  const isDuplicate = courses.some((c) => {
+    // If editing, ignore the same course
+    if (editingId && c.id === editingId) return false;
+
+    return c.course_name.toLowerCase().trim() === normalizedNew;
+  });
+
+  if (isDuplicate) {
+    setError("Course already exists");
     return;
   }
 
   setError("");
 
   const payload = {
-    course_name: courseName,
+    course_name: courseName.trim(), // also trim before sending
     duration_value: Number(durationValue),
     duration_unit: durationUnit,
   };
@@ -90,6 +111,7 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
     setError(msg);
   }
 };
+;
 
 
   const handleEdit = (course: Course) => {
@@ -107,6 +129,17 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
   });
 
   const uniqueCourses = Array.from(uniqueCoursesMap.values());
+  const totalPages = Math.ceil(uniqueCourses.length / PAGE_SIZE);
+
+  const paginatedCourses = uniqueCourses.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+   useEffect(() => {
+  setCurrentPage(1);
+  }, [uniqueCourses.length]);
+
 
   return (
     <div className="card">
@@ -162,7 +195,7 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
 
       <hr />
 
-      {uniqueCourses.map((course) => {
+      {paginatedCourses.map((course) => {
         const students = courseStudentMap.get(course.id) || [];
         const count = students.length;
 
@@ -212,6 +245,39 @@ function CourseList({ courses, enrollments, onCourseChange }: CourseListProps) {
       </div>
     );
   })}
+
+  {totalPages > 1 && (
+    <div
+      style={{
+        marginTop: "15px",
+        display: "flex",
+        justifyContent: "center",
+        gap: "12px",
+        alignItems: "center",
+        fontSize: "12px",
+        color: "gray",
+      }}
+      >
+      <button style={{fontSize: "12px"}}
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage((p) => p - 1)}
+      >
+        Prev
+      </button>
+
+      <span>
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <button style={{fontSize: "12px"}}
+        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage((p) => p + 1)}
+      >
+        Next
+      </button>
+      </div>
+    )}
+
 
   </div>
   );

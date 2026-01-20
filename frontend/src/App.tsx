@@ -59,6 +59,7 @@ function App() {
               <>
                 <EnrollmentForm
                   courses={courses}
+                  enrollments={enrollments}
                   onEnroll={fetchEnrollments}
                 />
 
